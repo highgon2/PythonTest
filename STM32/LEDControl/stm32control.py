@@ -12,8 +12,7 @@ from stm32board import *
 class LEDController:
     def __init__(self):
         self.__queue      = queue.Queue()
-        self.__stm32board = STM32Board();
-        self.__stm32recv  = None
+        self.__stm32board = STM32Board(self.__queue);
 
         app_x, app_y, app_width, app_height = 0, 0, 360, 285
         for m in screeninfo.get_monitors():
@@ -56,12 +55,8 @@ class LEDController:
             self.__lbl_voltage.append(tkinter.Label(self.__lbf_ctrl, text="TBD", relief="solid"))
             self.__btn_led_on.append(tkinter.Button(self.__lbf_ctrl, text="ON"))
             self.__btn_led_off.append(tkinter.Button(self.__lbf_ctrl, text="OFF"))
-
-    def __set_widget_config(self):
-        for i in range(4):
-            led = self.__stm32board.get_led("LED {}".format(i+1))
-            if led.state: self.__lbl_state[i].config(bg="lightgreen")
-            else:         self.__lbl_state[i].config(bg="black")
+            # self.__btn_led_on.append(tkinter.Button(self.__lbf_ctrl, text="ON", command=lambda:self.__btn_blink_command(i, 1)))
+            # self.__btn_led_off.append(tkinter.Button(self.__lbf_ctrl, text="OFF", command=lambda:self.__btn_blink_command(0, 0)))
 
     def __add_widget(self):
         self.__lbl_host.place(x=5, y=5, width=40, height=30)
@@ -78,12 +73,42 @@ class LEDController:
             self.__lbl_voltage[i].place(x=115, y=5+(i*relative_y), width=50, height=30)        
             self.__btn_led_on[i].place(x=170, y=5+(i*relative_y), width=70, height=30)
             self.__btn_led_off[i].place(x=245, y=5+(i*relative_y), width=70, height=30)
+
+        self.__btn_led_on[0]["command"] = lambda:self.__btn_blink_command(0, 1)
+        self.__btn_led_on[1]["command"] = lambda:self.__btn_blink_command(1, 1)
+        self.__btn_led_on[2]["command"] = lambda:self.__btn_blink_command(2, 1)
+        self.__btn_led_on[3]["command"] = lambda:self.__btn_blink_command(3, 1)
+
+        self.__btn_led_off[0]["command"] = lambda:self.__btn_blink_command(0, 0)
+        self.__btn_led_off[1]["command"] = lambda:self.__btn_blink_command(1, 0)
+        self.__btn_led_off[2]["command"] = lambda:self.__btn_blink_command(2, 0)
+        self.__btn_led_off[3]["command"] = lambda:self.__btn_blink_command(3, 0)
+
         self.__btn_disconn.place(x=260, y=245, width=90, height=30)
 
+    def __set_widget_config(self):
+        for i in range(4):
+            led = self.__stm32board.get_led("LED {}".format(i+1))
+            if led.state: self.__lbl_state[i].config(bg="lightgreen")
+            else:         self.__lbl_state[i].config(bg="black")
+    
+    def __btn_blink_command(self, index, blink):
+        # print("id(index) = {}, index = {}, blink = {}".format(id(index), index, blink))
+        req_led_ctrl = {
+            "message" : "req_led_ctrl",
+            "led" : {
+                "label": "LED {}".format(index+1),
+                "state": blink
+            }
+        }
+
+        json_string = json.dumps(req_led_ctrl)
+        # print("json_string =", json_string)
+        self.__stm32board.request_command(json_string)
+
     def __connect_device(self):
-        self.__stm32recv = STM32Receiver(self.__queue)
-        if self.__stm32recv.connect(self.__host.get(), self.__port.get()):
-            self.__stm32recv.start()
+        if self.__stm32board.connect(self.__host.get(), self.__port.get()):
+            self.__stm32board.start()
             self.__process_queue()
 
             self.__btn_conn.config(state="disabled")
@@ -103,10 +128,13 @@ class LEDController:
 
                     if not self.__stm32board.get_led(label):
                         self.__stm32board.append_led(label, state, voltage)
+                    else:
+                        self.__stm32board.set_led(label, state)
                 self.__set_widget_config()
-
         except queue.Empty:
-            self.__root.after(100, self.__process_queue)
+            pass
+
+        self.__root.after(100, self.__process_queue)
 
 
     def run(self):

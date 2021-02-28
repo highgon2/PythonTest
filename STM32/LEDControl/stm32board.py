@@ -28,27 +28,15 @@ class STM32LED:
     def voltage(self, voltage):
         self.__voltage = voltage
 
-class STM32Board:
-    def __init__(self):
-        self.__led_list = list()
-
-    def get_led(self, label):
-        for led in self.__led_list:
-            if label == led.label:
-                return led
-        return None
-
-    def append_led(self, label, state, voltage):
-        self.__led_list.append(STM32LED(label, state, voltage))
-        
-class STM32Receiver(threading.Thread):
+class STM32Board(threading.Thread):
     def __init__(self, queue):
         threading.Thread.__init__(self)
-        self.daemon = True
-        
-        self.__queue  = queue
-        self.__socket = None
-    
+
+        self.daemon     = True
+        self.__queue    = queue
+        self.__socket   = None
+        self.__led_list = list()
+
     def connect(self, ip, port):
         try :
             self.__socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -58,6 +46,10 @@ class STM32Receiver(threading.Thread):
             return False
         return True
 
+    def request_command(self, json_string):
+        send_message = "JSON" + json_string + "\r\n"
+        self.__socket.sendall(send_message.encode())
+        
     def run(self):
         while(1):
             data = self.__socket.recv(1024)
@@ -65,7 +57,16 @@ class STM32Receiver(threading.Thread):
             print("received :", data.decode())
         self.__socket.close()
 
+    def get_led(self, label):
+        for led in self.__led_list:
+            if label == led.label:
+                return led
+        return None
 
-if __name__ == "__main__":
-    b = STM32Board()
-    b.get_led("a")
+    def set_led(self, label, state):
+        for led in self.__led_list:
+            if led.label == label:
+                led.state = state
+
+    def append_led(self, label, state, voltage):
+        self.__led_list.append(STM32LED(label, state, voltage))
