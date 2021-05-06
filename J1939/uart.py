@@ -19,24 +19,28 @@ class Protocol(threading.Thread):
         self.__serial.write(b'\r')
 
     def run(self):
-        buf   = list()
-        null  = bytes(0x00)
-        count = 0
-        while self.__is_run:
-            c = self.__serial.read()
-            if c == null: continue
+        try:
+            buf   = list()
+            null  = bytes(0)
+            while self.__is_run:
+                c = self.__serial.read()
+                if c == null: continue
 
-            # print(c)
-            buf.append(c.decode("utf-8"))
-            if buf[len(buf)-2] == '\r' and buf[len(buf)-1] == '\n':
-                s = "".join(buf)
-                if s.find("PCAN_") < 0:
-                    # print("RECV({}) :: {}".format(len(s), s))
-                    self.__queue.put(s)
-                buf.clear()
+                # print(c)
+                buf.append(c.decode("utf-8"))
+                if buf[len(buf)-2] == '\r' and buf[len(buf)-1] == '\n':
+                    s = "".join(buf)
+                    if s.find("PCAN_") < 0:
+                        # print("RECV({}) :: {}".format(len(s), s))
+                        self.__queue.put(s)
+                    buf.clear()
+        except UnicodeDecodeError as e:
+            # print("C = 0x{:02x}".format(ord(c)))
+            self.__is_run = 0
+            self.__serial.close()
 
     def stop(self):
-        self.__is_run = False
+        self.__is_run = 0
 
     def close(self):
         for c in "rst":

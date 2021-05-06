@@ -3,10 +3,12 @@ import json
 
 import tkinter
 import tkinter.ttk as ttk
+import tkinter.messagebox as messagebox
 
 import queue
-import screeninfo
+import serial
 import serial.tools.list_ports as sp
+import screeninfo
 
 import uart
 import j1939_data
@@ -73,6 +75,9 @@ class J1939(tkinter.Frame):
                     for i in range(6):
                         if key_list[0] == self.__para_list[i].parameter:
                             self.__para_list[i].set_json(j_data)
+            except json.JSONDecodeError as e:
+				print("JSONDecodeError")
+                print("json_string :", json_string)
             except Exception as e:
                 print(e.with_traceback())
         else:
@@ -83,12 +88,16 @@ class J1939(tkinter.Frame):
 
     def __cb_btn_conn(self):
         if self.__con_string.get() == "Connect":
-            self.__uart = uart.Protocol(self.__cmb_port.get(), self.__queue)
-            self.__uart.daemon = True
-            self.__uart.start()
-            self.__uart.tx_message("PCAN_ID")
-            self.__root.after(50, self.__update_data)
-            self.__con_string.set("Disconnect")
+            try:
+                self.__uart = uart.Protocol(self.__cmb_port.get(), self.__queue)
+                self.__uart.daemon = True
+                self.__uart.start()
+                self.__uart.tx_message("PCAN_ID")
+                self.__root.after(50, self.__update_data)
+                self.__con_string.set("Disconnect")
+            except serial.SerialException as e:
+                messagebox.showerror(title="ERROR", message="Serial port can't connect : {}".format(self.__cmb_port.get()))
+
         else:
             self.__uart.stop()
             self.__uart.join()
