@@ -1,3 +1,4 @@
+import os
 import sys
 import json
 
@@ -32,6 +33,13 @@ class J1939(tkinter.Frame):
         self.__root.geometry(geometry)
         self.__root.title("J1939 Monitor")
         self.__root.option_add("*Font", "맑은고딕 10")
+
+        try:
+			# sys.MEIPASS is temp directory for pyinstaller
+            icon_path = os.path.join(getattr(sys, '_MEIPASS'), "j1939.png")
+        except:
+            icon_path = os.path.join(os.path.abspath("."), "j1939.png")
+        self.__root.iconphoto(True, tkinter.PhotoImage(file=icon_path))    
 
         self.__can_list   = [tkinter.StringVar() for _ in range(6)]
         self.__para_list  = [None for _ in range(6)]
@@ -76,7 +84,7 @@ class J1939(tkinter.Frame):
                         if key_list[0] == self.__para_list[i].parameter:
                             self.__para_list[i].set_json(j_data)
             except json.JSONDecodeError as e:
-				print("JSONDecodeError")
+                print("JSONDecodeError")
                 print("json_string :", json_string)
             except Exception as e:
                 print(e.with_traceback())
@@ -97,7 +105,6 @@ class J1939(tkinter.Frame):
                 self.__con_string.set("Disconnect")
             except serial.SerialException as e:
                 messagebox.showerror(title="ERROR", message="Serial port can't connect : {}".format(self.__cmb_port.get()))
-
         else:
             self.__uart.stop()
             self.__uart.join()

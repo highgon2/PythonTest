@@ -10,9 +10,11 @@ class Protocol(threading.Thread):
         self.__is_run  = 1
         self.__queue   = queue
         self.__serial = serial.Serial(device, 115200, timeout=0)
-        # self.__serial = serial.Serial("/dev/ttyUSB0", 115200, timeout=0)
 
     def tx_message(self, message):
+        if not self.__serial.is_open:
+            return
+
         for c in message:
             self.__serial.write(c.encode())
             time.sleep(0.005)
@@ -23,6 +25,9 @@ class Protocol(threading.Thread):
             buf   = list()
             null  = bytes(0)
             while self.__is_run:
+                if not self.__serial.is_open:
+                    continue
+
                 c = self.__serial.read()
                 if c == null: continue
 
@@ -43,6 +48,9 @@ class Protocol(threading.Thread):
         self.__is_run = 0
 
     def close(self):
+        if not self.__serial.is_open:
+            return
+
         for c in "rst":
             self.__serial.write(c.encode())
             time.sleep(0.005)
