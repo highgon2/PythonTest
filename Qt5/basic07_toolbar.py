@@ -8,12 +8,12 @@ class MyApp(QMainWindow):
         self.initUI()
 
     def initUI(self):
-        exitAction = QAction(QIcon("exit.png"), "Exit", self)
+        exitAction = QAction(QIcon("images/exit.png"), "Exit", self)
         exitAction.setShortcut("Ctrl+Q")
         exitAction.setStatusTip("Exit application")
         exitAction.triggered.connect(qApp.quit)
 
-        saveAction = QAction(QIcon("save.png"), "Save", self)
+        saveAction = QAction(QIcon("images/save.png"), "Save", self)
         saveAction.setShortcut("Ctrl+S")
         saveAction.setStatusTip("Save application")
         saveAction.triggered.connect(qApp.quit)
