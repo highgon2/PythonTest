@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container my-3">
+    <table class="table">
+        <thead>
+            <tr class="thead-dark">
+                <th>항목</th>
+                <th>상태</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>IMEI</td>
+                <td>{{dev_info.device_imei}}</td>
+            </tr>
+            <tr>
+                <td>수신시간</td>
+                <td>{{dev_info.datetime}}</td>
+            </tr>
+            <tr>
+                <td>엔진속도</td>
+                <td>{{dev_info.rpm}}</td>
+            </tr>
+            <tr>
+                <td>냉각수온도</td>
+                <td>{{dev_info.coolant}}</td>
+            </tr>
+            <tr>
+                <td>오일압력</td>
+                <td>{{dev_info.oil_pressure}}</td>
+            </tr>
+            <tr>
+                <td>오일온도</td>
+                <td>{{dev_info.oil_temperature}}</td>
+            </tr>
+            <tr>
+                <td>전압</td>
+                <td>{{dev_info.voltage}}</td>
+            </tr>
+            <tr>
+                <td>연료</td>
+                <td>{{dev_info.fuel}}</td>
+            </tr>
+            <tr>
+                <td>에러코드</td>
+                {% if dev_info.fault_code %}
+                <td>{{dev_info.fault_code}}</td>
+                {% else %}
+                <td>-</td>
+                {% endif %}
+            </tr>
+            {% if dev_info.gps_date %}
+            <tr>
+                <td>위도</td>
+                <td>{{dev_info.gps_latitude}}</td>
+            </tr>
+            <tr>
+                <td>경도</td>
+                <td>{{dev_info.gps_longitude}}</td>
+            </tr>
+            <tr>
+                <td>노트</td>
+                <td>{{dev_info.gps_knots}}</td>
+            </tr>
+            <tr>
+                <td>방향</td>
+                <td>{{dev_info.gps_direction}}</td>
+            </tr>
+            {% endif %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
