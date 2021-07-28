@@ -12,6 +12,7 @@
                 <th class="text-center">냉각수온도</th>
                 <th class="text-center">에러코드</th>
                 <th class="text-center">구글맵연결</th>
+                <th class="text-center">비고</th>
             </tr>
         </thead>
         <tbody>
@@ -35,6 +36,7 @@
                 {% else %}
                 <td class="text-center">-</td>
                 {% endif %}
+                <td class="text-center"><a href="{{url_for('info.detail', index=info.index)}}">상세정보</a></td>
             </tr>
             {% endfor %}
             {% else %}

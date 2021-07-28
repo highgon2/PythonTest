@@ -19,8 +19,6 @@ def input():
     except Exception as e:
         traceback.print_exc()
         return "{}".format(e)
-        # return redirect(url_for('main.index'))
-
     return redirect(url_for('info.lists'))
 
 def check_device(sn):
