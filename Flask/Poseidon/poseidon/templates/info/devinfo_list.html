@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container my-3">
+    <table class="table">
+        <thead>
+            <tr class="thead-dark">
+                <th class="text-center">IMEI</th>
+                <th class="text-center">수신시간</th>
+                <th class="text-center">엔진속도</th>
+                <th class="text-center">오일압력</th>
+                <th class="text-center">냉각수온도</th>
+                <th class="text-center">에러코드</th>
+                <th class="text-center">구글맵연결</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if info_list %}
+            {% for info in info_list %}
+            <tr>
+                <td class="text-center">{{info.device_imei}}</td>
+                <td class="text-center">{{info.datetime}}</td>
+                <td class="text-center">{{info.rpm}}</td>
+                <td class="text-center">{{info.oil_pressure}}</td>
+                <td class="text-center">{{info.coolant}}</td>
+            
+                {% if info.fault_code %}
+                <td class="text-center">{{info.fault_code}}</td>
+                {% else %}
+                <td class="text-center">-</td>
+                {% endif %}
+            
+                {% if info.latitude != 0 %}
+                <td class="text-center"><a href="https://map.google.com/maps/search/{{info.gps_latitude}}+{{info.gps_longitude}}" target="_blank">위치보기</a></td>
+                {% else %}
+                <td class="text-center">-</td>
+                {% endif %}
+            </tr>
+            {% endfor %}
+            {% else %}
+            <tr>
+                <td colspan="7" class="text-center">수신된 데이터가 없습니다.</td>
+            </tr>
+            {% endif %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
